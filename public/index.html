@@ -1,43 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<html>
+<head>
+  <title>Weekly Wage Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    .calculator {
+      border: 1px solid #ccc;
+      padding: 20px;
+      max-width: 400px;
+    }
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    .calculator h1 {
+      margin-top: 0;
+    }
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+    }
+
+    .results {
+      margin-top: 20px;
+    }
+
+    .results p {
+      margin: 5px 0;
+    }
+
+    #clearButton {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+  <h1>Weekly Wage Calculator</h1>
+  <form id="wageForm">
+    <div class="form-group">
+    <label for="hourlyRate">Hourly Rate of Pay:</label>
+    <input type="number" id="hourlyRate" name="hourlyRate" step="0.01" required><br>
+  </div>
+  <div class="form-group">
+    <label for="hoursWorked">Hours Worked:</label>
+    <input type="number" id="hoursWorked" name="hoursWorked" step="0.01" required><br>
+  </div>
+    <input type="submit" value="Calculate">
+    <button type="button" id="clearButton">Clear</button>
+  </form>
+  <div class="results" id="results">
+  <h2>Results</h2>
+  <div id="results">
+    <!-- Results will be displayed here -->
+  </div>
+</div>
+  <script>
+    const form = document.getElementById('wageForm');
+    const clearButton = document.getElementById('clearButton');
+    const resultsDiv = document.getElementById('results');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      calculateWages();
+    });
+
+    clearButton.addEventListener('click', () => {
+      form.reset();
+      resultsDiv.innerHTML = '';
+    });
+
+    function calculateWages() {
+      const hourlyRate = parseFloat(form.elements.hourlyRate.value);
+      const hoursWorked = parseFloat(form.elements.hoursWorked.value);
+
+      fetch('/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `hourlyRate=${hourlyRate}&hoursWorked=${hoursWorked}`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          resultsDiv.innerHTML = `
+            <p>Regular Pay: $${data.regularPay.toFixed(2)}</p>
+            <p>Overtime Pay: $${data.overtimePay.toFixed(2)}</p>
+            <p>Total Pay: $${data.totalPay.toFixed(2)}</p>
+          `;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    }
+ 
+  </script>
+</body>
 </html>
